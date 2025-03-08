@@ -1,0 +1,31 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.wav
+*.mp3
+.DS_Store
+
+
+
+# 可执行文件目录
+bin/
+
+# 包含文件
+include/
+
+# 库文件
+lib/
+
+# 共享文件
+share/
+
+# 音频文件
+english_output.wav
+
+# Python 虚拟环境配置
+pyvenv.cfg
+
