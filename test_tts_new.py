@@ -9,13 +9,16 @@ from functools import wraps
 # 添加安全的全局类
 def add_safe_globals_for_xtts():
     try:
-        # 尝试导入XttsConfig类
+        # 尝试导入所有需要的XTTS配置类
         from TTS.tts.configs.xtts_config import XttsConfig
+        from TTS.tts.models.xtts import XttsAudioConfig
+        
         # 添加到PyTorch安全全局列表
-        torch.serialization.add_safe_globals([XttsConfig])
-        print("已添加XttsConfig到安全全局列表")
-    except ImportError:
-        print("无法导入XttsConfig类，可能会影响XTTS模型加载")
+        safe_classes = [XttsConfig, XttsAudioConfig]
+        torch.serialization.add_safe_globals(safe_classes)
+        print(f"已添加XTTS相关类到安全全局列表: {[cls.__name__ for cls in safe_classes]}")
+    except ImportError as e:
+        print(f"无法导入XTTS相关类，可能会影响XTTS模型加载: {e}")
     except AttributeError:
         # 较旧版本的PyTorch可能没有add_safe_globals
         print("当前PyTorch版本不支持add_safe_globals，将使用替代方法")
@@ -29,9 +32,21 @@ def patched_torch_load(f, map_location=None, pickle_module=None, **kwargs):
         # 首先尝试使用默认设置加载
         return original_torch_load(f, map_location=map_location, pickle_module=pickle_module, **kwargs)
     except Exception as e:
-        # 如果失败，尝试使用weights_only=False
         print(f"使用默认设置加载模型失败，尝试使用weights_only=False: {str(e)}")
-        return original_torch_load(f, map_location=map_location, pickle_module=pickle_module, weights_only=False, **kwargs)
+        try:
+            # 如果失败，尝试使用weights_only=False
+            return original_torch_load(f, map_location=map_location, pickle_module=pickle_module, weights_only=False, **kwargs)
+        except Exception as e2:
+            # 如果仍然失败，打印详细错误并重新抛出
+            print(f"使用weights_only=False加载模型也失败: {str(e2)}")
+            # 尝试使用TTS库自己的加载方法
+            try:
+                from TTS.utils.io import load_checkpoint
+                print("尝试使用TTS库的load_checkpoint方法...")
+                return load_checkpoint(f, map_location=map_location)
+            except Exception as e3:
+                print(f"所有加载方法都失败: {str(e3)}")
+                raise e3
 
 # 替换torch.load函数
 torch.load = patched_torch_load
