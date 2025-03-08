@@ -5,6 +5,7 @@ import time
 import torch
 import importlib
 from functools import wraps
+import urllib.request
 
 # 添加安全的全局类
 def add_safe_globals_for_xtts():
@@ -54,6 +55,38 @@ torch.load = patched_torch_load
 # 添加安全全局类
 add_safe_globals_for_xtts()
 
+# 下载或创建参考音频文件
+def ensure_reference_audio(reference_path="reference_audio.wav"):
+    """确保参考音频文件存在，如果不存在则下载或创建一个"""
+    if os.path.exists(reference_path):
+        print(f"参考音频文件已存在: {reference_path}")
+        return reference_path
+    
+    # 尝试从网络下载一个示例参考音频
+    try:
+        print("参考音频文件不存在，尝试下载...")
+        # 使用一个公开的示例音频URL
+        url = "https://github.com/coqui-ai/TTS/raw/dev/tests/inputs/audio/ljspeech_1.wav"
+        urllib.request.urlretrieve(url, reference_path)
+        print(f"成功下载参考音频到: {reference_path}")
+        return reference_path
+    except Exception as e:
+        print(f"下载参考音频失败: {e}")
+        
+        # 如果下载失败，尝试使用简单的TTS模型创建一个
+        try:
+            print("尝试使用简单TTS模型创建参考音频...")
+            simple_tts = TTS("tts_models/en/ljspeech/tacotron2-DDC")
+            simple_tts.tts_to_file(
+                text="This is a reference audio for voice cloning.", 
+                file_path=reference_path
+            )
+            print(f"成功创建参考音频: {reference_path}")
+            return reference_path
+        except Exception as e2:
+            print(f"创建参考音频失败: {e2}")
+            return None
+
 def text_to_speech(text, output_path="output.wav", model_name="tts_models/en/ljspeech/tacotron2-DDC", play=True):
     """
     将文本转换为语音并播放
@@ -72,6 +105,10 @@ def text_to_speech(text, output_path="output.wav", model_name="tts_models/en/ljs
         # 设置多语言和多发言人参数
         speaker = None
         language = None
+        speaker_wav = None
+        
+        # 检查是否是XTTS v2模型，它需要特殊处理
+        is_xtts_v2 = "xtts_v2" in model_name
         
         # 安全地检查是否是多发言人模型
         if hasattr(tts, 'is_multi_speaker') and tts.is_multi_speaker:
@@ -81,6 +118,13 @@ def text_to_speech(text, output_path="output.wav", model_name="tts_models/en/ljs
                 speaker = tts.speakers[0]  # 使用第一个发音人
             else:
                 print("模型支持多发言人，但未找到发言人列表")
+                # 对于XTTS v2模型，需要提供一个参考音频
+                if is_xtts_v2:
+                    print("XTTS v2模型需要参考音频，使用默认参考音频")
+                    # 确保参考音频存在
+                    speaker_wav = ensure_reference_audio("reference_audio.wav")
+                    if not speaker_wav:
+                        raise Exception("无法创建或下载参考音频文件，无法继续")
         
         # 安全地检查是否是多语言模型
         if hasattr(tts, 'is_multi_lingual') and tts.is_multi_lingual:
@@ -103,6 +147,8 @@ def text_to_speech(text, output_path="output.wav", model_name="tts_models/en/ljs
             tts_params["speaker"] = speaker
         if language is not None:
             tts_params["language"] = language
+        if speaker_wav is not None:
+            tts_params["speaker_wav"] = speaker_wav
             
         tts.tts_to_file(**tts_params)
         
