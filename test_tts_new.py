@@ -1,50 +1,43 @@
-import sys
-import torch
-import importlib
-
-# 尝试导入TTS并获取所需的类
-try:
-    from TTS.tts.configs.xtts_config import XttsConfig
-    # 将XttsConfig类添加到安全全局对象列表
-    torch.serialization.add_safe_globals([XttsConfig])
-except ImportError:
-    print("无法导入XttsConfig类")
-
-try:
-    # 导入TTS并尝试使用
-    from TTS.api import TTS
-    tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2")
-    print("成功加载TTS模型")
-except Exception as e:
-    print(f"加载TTS模型失败: {e}")
-    
-    # 如果失败，尝试补丁方式
-    print("尝试使用weights_only=False方式加载...")
-    original_torch_load = torch.load
-    
-    def patched_torch_load(f, map_location=None, pickle_module=None, **kwargs):
-        kwargs['weights_only'] = False
-        return original_torch_load(f, map_location, pickle_module, **kwargs)
-    
-    # 应用补丁
-    torch.load = patched_torch_load
-    
-    try:
-        # 重新导入TTS模块
-        if 'TTS' in sys.modules:
-            del sys.modules['TTS']
-        from TTS.api import TTS
-        tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2")
-        print("使用weights_only=False成功加载TTS模型")
-    except Exception as e:
-        print(f"所有尝试都失败了: {e}")
-
-
-
 from TTS.api import TTS
 import os
 import subprocess
 import time
+import torch
+import importlib
+from functools import wraps
+
+# 添加安全的全局类
+def add_safe_globals_for_xtts():
+    try:
+        # 尝试导入XttsConfig类
+        from TTS.tts.configs.xtts_config import XttsConfig
+        # 添加到PyTorch安全全局列表
+        torch.serialization.add_safe_globals([XttsConfig])
+        print("已添加XttsConfig到安全全局列表")
+    except ImportError:
+        print("无法导入XttsConfig类，可能会影响XTTS模型加载")
+    except AttributeError:
+        # 较旧版本的PyTorch可能没有add_safe_globals
+        print("当前PyTorch版本不支持add_safe_globals，将使用替代方法")
+
+# 修补torch.load函数
+original_torch_load = torch.load
+
+@wraps(original_torch_load)
+def patched_torch_load(f, map_location=None, pickle_module=None, **kwargs):
+    try:
+        # 首先尝试使用默认设置加载
+        return original_torch_load(f, map_location=map_location, pickle_module=pickle_module, **kwargs)
+    except Exception as e:
+        # 如果失败，尝试使用weights_only=False
+        print(f"使用默认设置加载模型失败，尝试使用weights_only=False: {str(e)}")
+        return original_torch_load(f, map_location=map_location, pickle_module=pickle_module, weights_only=False, **kwargs)
+
+# 替换torch.load函数
+torch.load = patched_torch_load
+
+# 添加安全全局类
+add_safe_globals_for_xtts()
 
 def text_to_speech(text, output_path="output.wav", model_name="tts_models/en/ljspeech/tacotron2-DDC", play=True):
     """
@@ -65,27 +58,38 @@ def text_to_speech(text, output_path="output.wav", model_name="tts_models/en/ljs
         speaker = None
         language = None
         
-        if tts.is_multi_speaker:
-            print(f"可用的发音人: {tts.speakers}")
-            speaker = tts.speakers[0]  # 使用第一个发音人
-        
-        if tts.is_multi_lingual:
-            print(f"可用的语言: {tts.languages}")
-            # 根据文本自动选择语言
-            if any(u'\u4e00' <= c <= u'\u9fff' for c in text):  # 检测中文
-                language = "zh-cn"
+        # 安全地检查是否是多发言人模型
+        if hasattr(tts, 'is_multi_speaker') and tts.is_multi_speaker:
+            # 安全地检查speakers属性是否存在
+            if hasattr(tts, 'speakers') and tts.speakers:
+                print(f"可用的发音人: {tts.speakers}")
+                speaker = tts.speakers[0]  # 使用第一个发音人
             else:
-                language = "en"
-            print(f"选择的语言: {language}")
+                print("模型支持多发言人，但未找到发言人列表")
+        
+        # 安全地检查是否是多语言模型
+        if hasattr(tts, 'is_multi_lingual') and tts.is_multi_lingual:
+            if hasattr(tts, 'languages') and tts.languages:
+                print(f"可用的语言: {tts.languages}")
+                # 根据文本自动选择语言
+                if any(u'\u4e00' <= c <= u'\u9fff' for c in text):  # 检测中文
+                    language = "zh-cn"
+                else:
+                    language = "en"
+                print(f"选择的语言: {language}")
+            else:
+                print("模型支持多语言，但未找到语言列表")
         
         # 生成语音
         print(f"正在生成语音...")
-        tts.tts_to_file(
-            text=text, 
-            file_path=output_path,
-            speaker=speaker, 
-            language=language
-        )
+        # 只在属性存在时传递参数
+        tts_params = {"text": text, "file_path": output_path}
+        if speaker is not None:
+            tts_params["speaker"] = speaker
+        if language is not None:
+            tts_params["language"] = language
+            
+        tts.tts_to_file(**tts_params)
         
         # 显示成功信息
         abs_path = os.path.abspath(output_path)
