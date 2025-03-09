@@ -261,6 +261,6 @@ if __name__ == '__main__':
         logger.error(f"预加载模型失败: {e}")
     
     # 启动服务
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 8090))
     logger.info(f"启动TTS服务，监听端口: {port}")
     app.run(host='0.0.0.0', port=port, debug=False) 
