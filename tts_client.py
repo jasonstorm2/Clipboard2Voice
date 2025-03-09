@@ -4,6 +4,7 @@ import os
 import tempfile
 import time
 import json
+import argparse
 from typing import Optional, Dict, Any
 
 class TTSClient:
@@ -166,20 +167,48 @@ def text_to_speech(text, output_path=None, model_name="tts_models/en/ljspeech/ta
 
 
 if __name__ == "__main__":
-    # 示例用法
-    client = TTSClient()
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(description='TTS客户端')
+    parser.add_argument('--text', type=str, help='要转换为语音的文本')
+    parser.add_argument('--output', type=str, help='输出音频文件的路径')
+    parser.add_argument('--model', type=str, help='要使用的TTS模型名称')
+    parser.add_argument('--language', type=str, help='语言代码 (例如: en, zh-cn)')
+    parser.add_argument('--server', type=str, default='http://localhost:5000', help='TTS服务器URL')
+    parser.add_argument('--no-play', action='store_true', help='生成后不播放音频')
+    args = parser.parse_args()
     
-    # 检查已加载的模型
-    models = client.list_models()
-    print(f"服务器上已加载的模型: {models.get('loaded_models', [])}")
+    # 创建客户端
+    client = TTSClient(server_url=args.server)
     
-    # 英文示例
-    english_text = "This is a test. TTS can generate natural and fluent speech."
-    client.text_to_speech(english_text, "english_output.wav", "tts_models/en/ljspeech/tacotron2-DDC")
-    
-    # 留出一点间隔
-    time.sleep(1)
-    
-    # 中文示例
-    chinese_text = "这是一个测试。TTS可以生成自然流畅的语音。"
-    client.text_to_speech(chinese_text, "chinese_output.wav", "tts_models/multilingual/multi-dataset/xtts_v2") 
+    # 如果提供了命令行参数，则使用它们
+    if args.text:
+        output_path = args.output if args.output else f"output_{int(time.time())}.wav"
+        model_name = args.model if args.model else "tts_models/en/ljspeech/tacotron2-DDC"
+        
+        # 自动检测中文并设置模型
+        if not args.model and any(u'\u4e00' <= c <= u'\u9fff' for c in args.text):
+            print("检测到中文文本，使用XTTS v2模型")
+            model_name = "tts_models/multilingual/multi-dataset/xtts_v2"
+        
+        client.text_to_speech(
+            text=args.text,
+            output_path=output_path,
+            model_name=model_name,
+            language=args.language,
+            play=not args.no_play
+        )
+    else:
+        # 检查已加载的模型
+        models = client.list_models()
+        print(f"服务器上已加载的模型: {models.get('loaded_models', [])}")
+        
+        # 英文示例
+        english_text = "This is a test. TTS can generate natural and fluent speech."
+        client.text_to_speech(english_text, "english_output.wav", "tts_models/en/ljspeech/tacotron2-DDC")
+        
+        # 留出一点间隔
+        time.sleep(1)
+        
+        # 中文示例
+        chinese_text = "这是一个测试。TTS可以生成自然流畅的语音。"
+        client.text_to_speech(chinese_text, "chinese_output.wav", "tts_models/multilingual/multi-dataset/xtts_v2") 

@@ -245,11 +245,18 @@ def health_check():
 if __name__ == '__main__':
     # 预加载常用模型
     try:
-        logger.info("预加载常用TTS模型...")
-        # 预加载英文模型
-        model_manager.get_model("tts_models/en/ljspeech/tacotron2-DDC")
-        # 预加载多语言模型
-        model_manager.get_model("tts_models/multilingual/multi-dataset/xtts_v2")
+        # 检查是否跳过预加载
+        skip_preload = os.environ.get('SKIP_PRELOAD', '0').lower() in ('1', 'true', 'yes')
+        
+        if not skip_preload:
+            logger.info("预加载常用TTS模型...")
+            # 预加载英文模型
+            model_manager.get_model("tts_models/en/ljspeech/tacotron2-DDC")
+            # 预加载多语言模型
+            model_manager.get_model("tts_models/multilingual/multi-dataset/xtts_v2")
+            logger.info("模型预加载完成")
+        else:
+            logger.info("跳过模型预加载（SKIP_PRELOAD=1）")
     except Exception as e:
         logger.error(f"预加载模型失败: {e}")
     

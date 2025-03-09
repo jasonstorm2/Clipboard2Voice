@@ -2,13 +2,47 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File",
-            "type": "debugpy",
+            "name": "TTS服务器 - 正常启动",
+            "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/tts_server.py",
             "console": "integratedTerminal",
-            "python": "/Users/jasonli/githubpro/coqui_ai_tts/new_tts_env/bin/python",
-            "justMyCode": true
+            "justMyCode": false
+        },
+        {
+            "name": "TTS服务器 - 无预加载",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tts_server.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "SKIP_PRELOAD": "1"
+            }
+        },
+        {
+            "name": "TTS客户端",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tts_client.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "TTS客户端 - 自定义文本",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tts_client.py",
+            "args": ["--text", "这是通过调试模式启动的测试"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ],
+    "compounds": [
+        {
+            "name": "服务器 + 客户端",
+            "configurations": ["TTS服务器 - 正常启动", "TTS客户端"],
+            "stopAll": true
         }
     ]
 }
