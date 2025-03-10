@@ -1,103 +1,92 @@
-# TTS 语音合成微服务
+# 文本朗读助手
 
-这是一个基于Coqui TTS的语音合成微服务系统，支持英文和中文文本转语音。
+一个便捷的工具，可以将剪贴板中的文本自动转换为语音并朗读出来。支持中英文，自动检测语言，一键朗读。
 
-## 特点
+![版本](https://img.shields.io/badge/版本-1.0.0-blue)
+![Python版本](https://img.shields.io/badge/Python-3.7%2B-brightgreen)
+![许可证](https://img.shields.io/badge/许可证-MIT-green)
 
-- 服务端-客户端架构，避免每次合成语音时重新加载模型
-- 支持多种TTS模型，包括Tacotron2和XTTS v2
-- 支持中文和英文文本转语音
-- 自动模型选择 - 检测到中文时自动切换到多语言模型
-- 预加载常用模型，加快响应速度
+## 核心功能
 
-## 安装依赖
+- 🔊 **一键朗读**：复制文本后按下快捷键即可朗读
+- 🌐 **多语言支持**：自动检测中文和英文，选择合适的语音模型
+- 💻 **多环境适配**：提供微服务版、VPN兼容版和独立版
+- 🎯 **简单易用**：无需编程知识，适合所有用户
 
-```bash
-pip install flask requests TTS
-```
+## 快速开始
 
-对于Windows系统播放音频需要安装：
-```bash
-pip install playsound
-```
-
-## 使用方法
-
-### 1. 启动服务端
-
-首先，启动TTS服务端：
+### 安装
 
 ```bash
-python tts_server.py
+# 克隆仓库
+git clone https://github.com/用户名/项目名.git
+cd 项目名
+
+# 安装依赖
+pip install TTS flask requests pynput keyboard pyperclip
+
+# 在Windows系统上额外安装
+# pip install playsound
+
+# 设置权限（macOS/Linux）
+chmod +x run_server.sh run_client.sh run_hotkey_mac.sh run_standalone.sh run_vpn_tts.sh
 ```
 
-这将在本地启动一个TTS服务，监听端口8090。首次启动时，服务会下载并加载所需的TTS模型，可能需要一些时间。
+### 使用（三种方案）
 
-### 2. 使用客户端生成语音
-
-在另一个终端或脚本中，使用客户端生成语音：
-
-```python
-from tts_client import text_to_speech
-
-# 英文示例
-text_to_speech("Hello, this is a test.", "output_en.wav")
-
-# 中文示例
-text_to_speech("这是一个中文测试。", "output_zh.wav")
-```
-
-也可以直接运行客户端脚本查看示例：
-
+**1. 标准微服务方案**（普通网络环境）：
 ```bash
-python tts_client.py
+# 终端1：启动服务器
+./run_server.sh
+
+# 终端2：启动热键监听器
+./run_hotkey_mac.sh
+
+# 现在，复制任意文本并按下 ctrl+option+cmd+p 即可朗读
 ```
 
-## API参考
+**2. 独立方案**（VPN环境或不稳定网络）：
+```bash
+# 只需启动独立应用
+./run_standalone.sh
 
-### 客户端API
+# 复制文本并按下 ctrl+option+cmd+p
+```
 
-`text_to_speech` 函数接受以下参数：
+**3. VPN兼容方案**（轻度VPN干扰）：
+```bash
+# 终端1：启动服务器
+./run_server.sh
 
-- `text` (str): 要转换的文本
-- `output_path` (str, optional): 输出音频文件的路径，如果不指定则使用临时文件
-- `model_name` (str): 要使用的TTS模型名称
-- `language` (str, optional): 使用的语言，如果为None则自动检测
-- `play` (bool): 是否立即播放生成的音频
+# 终端2：启动VPN兼容版
+./run_vpn_tts.sh
 
-### 服务端API
+# 复制文本并按下 ctrl+option+cmd+p
+```
 
-服务端提供以下REST API端点：
+## 系统要求
 
-- `POST /tts`: 将文本转换为语音
-  - 请求体: `{"text": "要转换的文本", "model_name": "模型名称", "language": "语言"}`
-  - 响应: 音频文件 (WAV格式)
+- Python 3.7或更高版本
+- macOS、Windows或Linux系统
+- 约2GB可用内存（用于语音模型）
+- 互联网连接（首次下载模型时需要）
 
-- `GET /models`: 获取已加载的模型列表
-  - 响应: `{"loaded_models": ["模型1", "模型2"], "reference_audio": "参考音频路径"}`
+## 详细文档
 
-- `GET /health`: 健康检查端点
-  - 响应: `{"status": "running"}`
+- [用户指南](README_USER_GUIDE.md) - 详细的安装和使用说明
+- [VPN问题解决](vpn_issue_resolution.md) - VPN环境下的故障排除指南
+- [项目结构](docs/project_structure.md) - 项目代码结构和组件说明（如有）
 
-## 常见问题
+## 许可证
 
-1. **服务启动失败或模型加载错误**
-   - 确保已安装所有依赖包
-   - 检查网络连接是否正常，模型需要从网络下载
+本项目基于MIT许可证开源。
 
-2. **中文语音合成失败**
-   - 确保XTTS v2模型加载成功
-   - 检查是否有可用的参考音频
+## 致谢
 
-3. **音频播放失败**
-   - 对于Windows系统，确保已安装`playsound`库
-   - 检查系统是否有可用的音频输出设备
+- [Coqui TTS](https://github.com/coqui-ai/TTS) - 提供高质量的文本转语音功能
+- [Flask](https://flask.palletsprojects.com/) - 用于构建微服务API
+- [pynput](https://github.com/moses-palmer/pynput) - 提供可靠的全局热键监听
 
-## 支持的模型
+---
 
-以下是一些常用的TTS模型：
-
-- 英文模型: `tts_models/en/ljspeech/tacotron2-DDC`
-- 多语言模型: `tts_models/multilingual/multi-dataset/xtts_v2`
-
-更多模型可在Coqui TTS文档中找到。 
+欢迎提出问题、反馈和贡献！ 
