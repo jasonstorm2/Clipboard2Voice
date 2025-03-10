@@ -10,7 +10,7 @@ from typing import Optional, Dict, Any
 class TTSClient:
     """TTS客户端类，与TTS服务器交互生成语音"""
     
-    def __init__(self, server_url: str = "http://localhost:8090"):
+    def __init__(self, server_url: str = "http://127.0.0.1:8090"):
         """
         初始化TTS客户端
         
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     parser.add_argument('--output', type=str, help='输出音频文件的路径')
     parser.add_argument('--model', type=str, help='要使用的TTS模型名称')
     parser.add_argument('--language', type=str, help='语言代码 (例如: en, zh-cn)')
-    parser.add_argument('--server', type=str, default='http://localhost:8090', help='TTS服务器URL')
+    parser.add_argument('--server', type=str, default='http://127.0.0.1:8090', help='TTS服务器URL')
     parser.add_argument('--no-play', action='store_true', help='生成后不播放音频')
     args = parser.parse_args()
     
