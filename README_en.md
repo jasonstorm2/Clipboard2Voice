@@ -1,5 +1,9 @@
 # Coqui TTS Hotkey System
 
+<div align="right">
+  <a href="README.md">中文</a> | <a href="README_en.md">English</a>
+</div>
+
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Python](https://img.shields.io/badge/python-3.8%2B-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)

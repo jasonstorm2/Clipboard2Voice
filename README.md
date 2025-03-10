@@ -1,5 +1,9 @@
 # 文本朗读助手
 
+<div align="right">
+  <a href="README.md">中文</a> | <a href="README_en.md">English</a>
+</div>
+
 一个便捷的工具，可以将剪贴板中的文本自动转换为语音并朗读出来。支持中英文，自动检测语言，一键朗读。
 
 ![版本](https://img.shields.io/badge/版本-1.0.0-blue)

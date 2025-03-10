@@ -1,5 +1,9 @@
 # Project Structure and Component Description
 
+<div align="right">
+  <a href="project_structure.md">中文</a> | <a href="project_structure_en.md">English</a>
+</div>
+
 This document provides detailed information about the code structure, component functions, and their relationships in the Text Reading Assistant project, helping developers and advanced users understand the project architecture.
 
 ## Table of Contents

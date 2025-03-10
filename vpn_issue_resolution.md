@@ -1,5 +1,9 @@
 # VPN环境下TTS系统问题排查与解决文档
 
+<div align="right">
+  <a href="vpn_issue_resolution.md">中文</a> | <a href="vpn_issue_resolution_en.md">English</a>
+</div>
+
 ## 1. 问题背景
 
 在开发基于Coqui TTS的文本转语音系统时，我们最初设计了一个微服务架构，将TTS功能封装为服务器，并通过热键监听器客户端调用。这种架构可以避免每次生成语音都需要重新加载模型，显著提高响应速度。

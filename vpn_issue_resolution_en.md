@@ -1,5 +1,9 @@
 # TTS System Troubleshooting and Resolution in VPN Environments
 
+<div align="right">
+  <a href="vpn_issue_resolution.md">中文</a> | <a href="vpn_issue_resolution_en.md">English</a>
+</div>
+
 ## 1. Problem Background
 
 When developing a text-to-speech system based on Coqui TTS, we initially designed a microservice architecture that encapsulated TTS functionality as a server, accessed through a hotkey listener client. This architecture avoided the need to reload the model each time speech was generated, significantly improving response speed.

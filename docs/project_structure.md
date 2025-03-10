@@ -1,5 +1,9 @@
 # 项目结构与组件说明
 
+<div align="right">
+  <a href="project_structure.md">中文</a> | <a href="project_structure_en.md">English</a>
+</div>
+
 本文档详细介绍了文本朗读助手项目的代码结构、组件功能及其相互关系，帮助开发者和高级用户理解项目架构。
 
 ## 目录

@@ -1,5 +1,9 @@
 # User Guide for Coqui TTS System
 
+<div align="right">
+  <a href="README_USER_GUIDE.md">中文</a> | <a href="README_USER_GUIDE_en.md">English</a>
+</div>
+
 ## Table of Contents
 
 1. [Introduction](#introduction)

@@ -1,3 +1,9 @@
+# Coqui TTS 系统用户指南
+
+<div align="right">
+  <a href="README_USER_GUIDE.md">中文</a> | <a href="README_USER_GUIDE_en.md">English</a>
+</div>
+
 # 文本朗读助手：使用指南
 
 ## 目录
