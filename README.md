@@ -71,11 +71,18 @@ chmod +x run_server.sh run_client.sh run_hotkey_mac.sh run_standalone.sh run_vpn
 - 约2GB可用内存（用于语音模型）
 - 互联网连接（首次下载模型时需要）
 
-## 详细文档
+## 📖 文档
 
-- [用户指南](README_USER_GUIDE.md) - 详细的安装和使用说明
-- [VPN问题解决](vpn_issue_resolution.md) - VPN环境下的故障排除指南
-- [项目结构](docs/project_structure.md) - 项目代码结构和组件说明（如有）
+- [用户指南](README_USER_GUIDE.md) - 完整的设置和使用说明
+- [项目结构](docs/project_structure.md) - 系统组件的技术概述
+- [VPN问题解决](vpn_issue_resolution.md) - VPN相关连接问题的解决方案
+
+### 英文文档 / English Documentation
+
+- [README (English)](README_en.md) - Project overview in English
+- [User Guide (English)](README_USER_GUIDE_en.md) - Setup and usage instructions in English
+- [Project Structure (English)](docs/project_structure_en.md) - Technical overview in English
+- [VPN Issue Resolution (English)](vpn_issue_resolution_en.md) - Solutions for VPN-related issues in English
 
 ## 许可证
 
